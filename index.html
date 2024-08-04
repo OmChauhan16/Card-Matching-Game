@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Matching</title>
+
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 250px);
+            gap: 20px;
+            max-width: 600px;
+        }
+
+        .card {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 120px;
+            width: 200px;
+            background-color: #f0f0f0;
+            font-size: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .card.flipped {
+            background-color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="board"></div>
+    <script>
+        const numbers = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6];
+        let flippedCards = [];
+        let matchingCards = [];
+        let canFlip = true;
+
+
+        function generateRandomNumbersPairs(numPairs) {
+            const numbers = [];
+            for (let i = 0; i < numPairs; i++) {
+                const randomNumber = Math.floor(Math.random() * 100) + 1; // Generates a number between 1 and 100
+                numbers.push(randomNumber, randomNumber); // Push the pair of random numbers
+            }
+            numbers.sort(() => Math.random() - 0.5); // Shuffle the array
+            return numbers;
+        }
+
+        function createCard(number) {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.number = number;
+            card.textContent = '?';
+            card.addEventListener('click', flipCard);
+            return card;
+        }
+
+        function flipCard() {
+            if (!canFlip || flippedCards.length >= 2 || this.classList.contains('flipped')) {
+                return;
+            }
+
+            this.classList.add('flipped');
+            this.textContent = this.dataset.number;
+            flippedCards.push(this);
+
+            if (flippedCards.length == 2) {
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            canFlip = false;
+            setTimeout(() => {
+                const [card1, card2] = flippedCards;
+                if (card1.dataset.number == card2.dataset.number) {
+                    matchingCards.push(card1, card2);
+                    if (matchingCards.length == numbers.length) {
+                        setTimeout(() => alert('Congratulations! You Won'), 500);
+                        resetGame();
+                    }
+                }
+                else {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    card1.textContent = '?';
+                    card2.textContent = '?';
+                }
+                flippedCards = [];
+                canFlip = true;
+                // }
+            }, 1000);
+        }
+
+        function initGame() {
+            const numPairs = 6; // Define how many pairs you want
+            const gameBoard = document.querySelector('.board');
+            const numbers = generateRandomNumbersPairs(numPairs);
+            numbers.forEach(number => {
+                const card = createCard(number);
+                gameBoard.appendChild(card);
+            });
+        }
+        initGame();
+
+        function resetGame() {
+            // Clear the game board
+            const gameBoard = document.querySelector('.board');
+            gameBoard.innerHTML = '';
+
+            // Reset game-related variables
+            flippedCards = [];
+            matchingCards = [];
+            canFlip = true;
+
+            // Reinitialize the game
+            initGame();
+        }
+    </script>
+</body>
+
+</html>
